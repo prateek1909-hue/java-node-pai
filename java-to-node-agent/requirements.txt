@@ -1,0 +1,35 @@
+# LangChain / LangGraph
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.3.0
+langchain-anthropic>=0.2.0
+
+# Azure OAuth
+azure-identity>=1.15.0
+
+# Java AST parsing
+# NOTE (Windows): tree-sitter-java compiles a native extension.
+# Requires Visual C++ Build Tools 2022. Check PyPI for pre-built wheels if unavailable.
+tree-sitter>=0.22.0
+tree-sitter-java>=0.21.0
+
+# Token counting
+tiktoken>=0.7.0
+
+# Settings / Env
+pydantic>=2.4.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+
+# Web UI
+flask>=3.0.0
+
+# HTTP client
+httpx>=0.25.0
+
+# CLI formatting
+rich>=13.0.0
+
+# Testing
+pytest>=7.4.0

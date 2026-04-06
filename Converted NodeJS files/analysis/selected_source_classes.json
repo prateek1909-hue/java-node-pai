@@ -1,0 +1,143 @@
+{
+  "ReportController": {
+    "name": "ReportController",
+    "package": "com.example.app.services.store.controller",
+    "category": "Controller",
+    "file_path": "C:\\Users\\ha9196k\\Downloads\\spring-rest-sakila-main\\spring-rest-sakila-main\\src\\main\\java\\com\\example\\app\\services\\store\\controller\\ReportController.java",
+    "method_count": 2,
+    "field_count": 3,
+    "methods": [
+      {
+        "name": "reportSalesByCategory",
+        "signature": "ResponseEntity<CollectionModel<CategorySalesDto.CategorySalesResponse>> reportSalesByCategory()",
+        "description": "This method retrieves sales data categorized by product categories.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "reportSalesByStore",
+        "signature": "ResponseEntity<CollectionModel<StoreSalesDto.StoreSalesResponse>> reportSalesByStore()",
+        "description": "This method retrieves sales data aggregated by individual stores.",
+        "complexity": "Medium"
+      }
+    ]
+  },
+  "ReportService": {
+    "name": "ReportService",
+    "package": "com.example.app.services.store.service",
+    "category": "Service",
+    "file_path": "C:\\Users\\ha9196k\\Downloads\\spring-rest-sakila-main\\spring-rest-sakila-main\\src\\main\\java\\com\\example\\app\\services\\store\\service\\ReportService.java",
+    "method_count": 2,
+    "field_count": 0,
+    "methods": [
+      {
+        "name": "reportSalesByCategory",
+        "signature": "List<CategorySalesDto.CategorySales> reportSalesByCategory()",
+        "description": "Generates a report of sales categorized by product categories.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "reportSalesByStore",
+        "signature": "List<StoreSalesDto.StoreSales> reportSalesByStore()",
+        "description": "Generates a report of sales aggregated by individual stores.",
+        "complexity": "Medium"
+      }
+    ]
+  },
+  "StoreService": {
+    "name": "StoreService",
+    "package": "com.example.app.services.store.service",
+    "category": "Service",
+    "file_path": "C:\\Users\\ha9196k\\Downloads\\spring-rest-sakila-main\\spring-rest-sakila-main\\src\\main\\java\\com\\example\\app\\services\\store\\service\\StoreService.java",
+    "method_count": 13,
+    "field_count": 0,
+    "methods": [
+      {
+        "name": "getStoreList",
+        "signature": "List<StoreDto.Store> getStoreList(Pageable pageable)",
+        "description": "Retrieves a paginated list of stores.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "getStore",
+        "signature": "Optional<StoreDto.Store> getStore(Integer storeId)",
+        "description": "Fetches a store by its unique identifier.",
+        "complexity": "Low"
+      },
+      {
+        "name": "getStoreDetailsList",
+        "signature": "List<StoreDetailsDto.StoreDetails> getStoreDetailsList()",
+        "description": "Returns a list of detailed information about all stores.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "getStoreDetails",
+        "signature": "Optional<StoreDetailsDto.StoreDetails> getStoreDetails(Integer storeId)",
+        "description": "Obtains detailed information about a specific store.",
+        "complexity": "Low"
+      },
+      {
+        "name": "getStoreStaffList",
+        "signature": "List<StaffDto.Staff> getStoreStaffList(Integer storeId)",
+        "description": "Lists all staff members associated with a specific store.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "getStoreStaff",
+        "signature": "Optional<StaffDto.Staff> getStoreStaff(Integer storeId, Integer staffId)",
+        "description": "Retrieves information about a specific staff member in a store.",
+        "complexity": "Low"
+      },
+      {
+        "name": "checkInventoryStock",
+        "signature": "List<InventoryDto.Inventory> checkInventoryStock(Integer storeId, Integer filmId)",
+        "description": "Checks the inventory stock for a specific film in a store.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "addStore",
+        "signature": "StoreDto.Store addStore()",
+        "description": "Creates and adds a new store to the system.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "addStoreStaff",
+        "signature": "StaffDto.Staff addStoreStaff(Integer storeId, Integer staffId)",
+        "description": "Adds a new staff member to a specific store.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "updateStore",
+        "signature": "StoreDto.Store updateStore(Integer storeId)",
+        "description": "Updates the information of an existing store.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "updateStoreStaff",
+        "signature": "StaffDto.Staff updateStoreStaff(Integer storeId, Integer staffId)",
+        "description": "Modifies the details of a specific staff member in a store.",
+        "complexity": "Medium"
+      },
+      {
+        "name": "deleteStore",
+        "signature": "void deleteStore(Integer storeId)",
+        "description": "Removes a store from the system using its identifier.",
+        "complexity": "Low"
+      },
+      {
+        "name": "removeStoreStaff",
+        "signature": "void removeStoreStaff(Integer storeId, Integer staffId)",
+        "description": "Deletes a staff member from a specific store.",
+        "complexity": "Low"
+      }
+    ]
+  },
+  "CustomInventoryRepository": {
+    "name": "CustomInventoryRepository",
+    "package": "com.example.app.services.store.repository.custom",
+    "category": "DAO",
+    "file_path": "C:\\Users\\ha9196k\\Downloads\\spring-rest-sakila-main\\spring-rest-sakila-main\\src\\main\\java\\com\\example\\app\\services\\store\\repository\\custom\\CustomInventoryRepository.java",
+    "method_count": 0,
+    "field_count": 0,
+    "methods": []
+  }
+}

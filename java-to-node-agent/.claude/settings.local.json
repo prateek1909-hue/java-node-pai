@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs rm:*)",
+      "Bash(pip install:*)",
+      "Bash(python ui.py)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(kill 7680)",
+      "Bash(taskkill //PID 7680 //F)",
+      "Bash(ls /c/Users/ha9196k/Documents/spring-rest-sakila/java-to-node-agent/*.py)",
+      "Read(//d/outp/**)",
+      "Bash(.venv/Scripts/python -c ':*)",
+      "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('ui.py'\\).read\\(\\)\\); print\\('OK - no syntax errors'\\)\")"
+    ]
+  }
+}
