@@ -671,14 +671,14 @@ All significant design decisions are documented as Architecture Decision Records
 
 | ADR | Decision | Status |
 |---|---|---|
-| [ADR-001](docs/adr/ADR-001-langgraph-workflow-orchestration.md) | Use LangGraph for workflow orchestration | Accepted |
-| [ADR-002](docs/adr/ADR-002-llm-based-code-generation.md) | LLM-based code generation over rule-based transformation | Accepted |
-| [ADR-003](docs/adr/ADR-003-multi-provider-llm-support.md) | Multi-provider LLM support (OpenAI, Azure, Anthropic) | Accepted |
-| [ADR-004](docs/adr/ADR-004-rag-with-chromadb.md) | RAG with ChromaDB | Superseded by ADR-002 |
-| [ADR-005](docs/adr/ADR-005-tree-sitter-java-parsing.md) | tree-sitter for Java AST parsing | Accepted |
-| [ADR-006](docs/adr/ADR-006-clean-architecture-output.md) | Clean Architecture as target output structure | Accepted |
-| [ADR-007](docs/adr/ADR-007-shared-state-pipeline.md) | Shared state pipeline pattern for workflow nodes | Accepted |
-| [ADR-008](docs/adr/ADR-008-template-method-generators.md) | Template Method pattern for code generators | Accepted |
-| [ADR-009](docs/adr/ADR-009-pydantic-domain-models.md) | Pydantic for domain and data transfer models | Accepted |
-| [ADR-010](docs/adr/ADR-010-environment-based-configuration.md) | Environment-based configuration with pydantic-settings | Accepted |
-| [ADR-011](docs/adr/ADR-011-flask-web-ui.md) | Flask Web UI with Server-Sent Events | Accepted |
+| [ADR-001](java-to-node-agent/docs/adr/ADR-001-langgraph-workflow-orchestration.md) | Use LangGraph for workflow orchestration | Accepted |
+| [ADR-002](java-to-node-agent/docs/adr/ADR-002-llm-based-code-generation.md) | LLM-based code generation over rule-based transformation | Accepted |
+| [ADR-003](java-to-node-agent/docs/adr/ADR-003-multi-provider-llm-support.md) | Multi-provider LLM support (OpenAI, Azure, Anthropic) | Accepted |
+| [ADR-004](java-to-node-agent/docs/adr/ADR-004-rag-with-chromadb.md) | RAG with ChromaDB | Superseded by ADR-002 |
+| [ADR-005](java-to-node-agent/docs/adr/ADR-005-tree-sitter-java-parsing.md) | tree-sitter for Java AST parsing | Accepted |
+| [ADR-006](java-to-node-agent/docs/adr/ADR-006-clean-architecture-output.md) | Clean Architecture as target output structure | Accepted |
+| [ADR-007](java-to-node-agent/docs/adr/ADR-007-shared-state-pipeline.md) | Shared state pipeline pattern for workflow nodes | Accepted |
+| [ADR-008](java-to-node-agent/docs/adr/ADR-008-template-method-generators.md) | Template Method pattern for code generators | Accepted |
+| [ADR-009](java-to-node-agent/docs/adr/ADR-009-pydantic-domain-models.md) | Pydantic for domain and data transfer models | Accepted |
+| [ADR-010](java-to-node-agent/docs/adr/ADR-010-environment-based-configuration.md) | Environment-based configuration with pydantic-settings | Accepted |
+| [ADR-011](java-to-node-agent/docs/adr/ADR-011-flask-web-ui.md) | Flask Web UI with Server-Sent Events | Accepted |
