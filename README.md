@@ -422,7 +422,7 @@ LOG_LEVEL=INFO                     # DEBUG | INFO | WARNING | ERROR
 
 ## Token Limit Management
 
-Token budget is managed in **three defensive layers**, from innermost (data-level) to outermost (string-level). This ordering ensures semantically important content is preserved; only low-value content is ever silently dropped.
+Token budget is managed in **three defensive layers** plus a **multi-pass recovery loop**. The layers prevent overflow; the recovery loop ensures no method is permanently lost when overflow occurs.
 
 ### Overview
 
@@ -440,6 +440,7 @@ Token budget is managed in **three defensive layers**, from innermost (data-leve
 │  Keeps business logic; drops accessors and low-complexity    │
 │  Budget: 2 000 tokens for methods_info                       │
 │          1 000 tokens for source_context.methods             │
+│  Returns (selected, dropped) — dropped list feeds Layer 4    │
 └──────────────────────────┬──────────────────────────────────┘
                            │ compact, valid JSON
                            ▼
@@ -448,6 +449,16 @@ Token budget is managed in **three defensive layers**, from innermost (data-leve
 │  Fires only if the full prompt still exceeds the context     │
 │  window after Layer 2. Snaps to the last newline to avoid   │
 │  cutting through a JSON structure.                           │
+│  Sets _last_call_was_truncated flag → triggers Layer 4       │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ first-pass code generated
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 4 — Multi-pass recovery (MultiPassMerger)            │
+│  Fires when Layer 2 dropped methods OR Layer 3 truncated     │
+│  Runs up to MAX_PASSES extra LLM calls (default: 10)        │
+│  Each pass handles the next batch of dropped methods         │
+│  Merges all passes into a single coherent output file        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -465,7 +476,7 @@ This prevents runaway API costs and ensures the model stops generating before th
 
 ### Layer 2 — Semantic method budgeting
 
-**Where it fires:** `generate_service_layer`, `generate_controller`, `generate_use_case` in [src/generators/llm_code_creator.py](src/generators/llm_code_creator.py).
+**Where it fires:** `generate_service_layer` in [src/generators/llm_code_creator.py](src/generators/llm_code_creator.py).
 
 **Algorithm (`token_budget.budget_methods`):**
 
@@ -480,8 +491,9 @@ This prevents runaway API costs and ensures the model stops generating before th
                (get* / set* / is* where the char after the prefix is uppercase)
 
 3. Greedy selection: iterate priority-descending, accumulate until budget exhausted
-4. Restore original declaration order in the returned subset
-5. Log WARNING if any methods were dropped
+4. Restore original declaration order in both the selected and dropped subsets
+5. Return (selected, dropped) — the dropped list is passed to Layer 4 for recovery
+6. Log WARNING listing how many methods were dropped
 ```
 
 **Budget constants** (conservative — safe for all models including GPT-4 8K):
@@ -490,8 +502,9 @@ This prevents runaway API costs and ensures the model stops generating before th
 |---|---|
 | `methods_info` (main method list) | 2 000 tokens |
 | `source_context.methods` (supplemental Java context) | 1 000 tokens |
+| Each extra-pass method batch | 1 000 tokens (half the main budget) |
 
-**Why accessors are the correct things to drop:**
+**Why accessors are the correct things to drop first:**
 
 ```
 Losing  getFirstName(), setActive(boolean)  →  near-zero quality impact
@@ -522,6 +535,8 @@ if tokens(system_prompt + user_prompt) > available_input_tokens:
 
     user_prompt = candidate + "\n[... input truncated to fit context window ...]"
 
+    _last_call_was_truncated = True   ← signals Layer 4 to run recovery
+
     log WARNING(
         original_tokens  = N,
         truncated_tokens = M,
@@ -530,7 +545,67 @@ if tokens(system_prompt + user_prompt) > available_input_tokens:
     )
 ```
 
-The newline-snap is the critical detail: it guarantees the prompt ends on a complete line so JSON arrays and objects are never left half-open. The LLM receives valid, parseable context even when truncation fires.
+The newline-snap guarantees the prompt ends on a complete line so JSON arrays and objects are never left half-open. The `_last_call_was_truncated` flag on `LLMClient` is reset at the start of every `generate()` call and read immediately after by the generator to trigger Layer 4.
+
+### Layer 4 — Multi-pass recovery
+
+**Where it fires:** `generate_service_layer` in [src/generators/llm_code_creator.py](src/generators/llm_code_creator.py), orchestrated by `MultiPassMerger` in [src/generators/multi_pass_merger.py](src/generators/multi_pass_merger.py).
+
+**Trigger conditions:**
+
+| Condition | Description |
+|---|---|
+| `dropped_methods` is non-empty | Layer 2 dropped at least one method |
+| `_last_call_was_truncated` is True | Layer 3 cut the prompt string |
+| Either or both | Recovery runs regardless of which layer fired |
+
+**Pass loop:**
+
+```
+passes_done = 1   (first pass already completed by generate_service_layer)
+
+while dropped_methods remain AND passes_done < MAX_PASSES:
+
+    batch = next budget-sized chunk of dropped_methods   (≤ 1 000 tokens)
+    remaining = dropped_methods − batch
+
+    extra_pass_prompt:
+      "DO NOT redeclare the class. Output ONLY these missing methods as bare
+       class methods (no class wrapper, no imports, no constructor):
+       {batch}"
+
+    extra_code = llm_client.generate(extra_pass_prompt)
+    accumulated_code = merge(accumulated_code, extra_code)
+    passes_done += 1
+
+if any methods still remain after MAX_PASSES:
+    log WARNING — increase MAX_PASSES or reduce method count
+```
+
+**Truncation sub-cases:**
+
+| Sub-case | Condition | Recovery strategy |
+|---|---|---|
+| A | Layer 2 dropped methods + Layer 3 truncated | Use `dropped_methods` list — it's a clean, structured remainder |
+| B | Layer 3 truncated but no methods were dropped | Recovery pass: LLM compares partial output against full original method list and generates what is missing |
+
+**Merge strategy (in preference order):**
+
+1. **Structural merge** (default) — strip the closing `}` from the accumulated class, append the extra-pass bare methods, re-close. No extra LLM call needed.
+2. **LLM-assisted merge** (fallback) — if the extra-pass code still contains a class declaration despite the instruction, a third LLM call merges both fragments into one valid class.
+
+**Deduplication guards applied after every merge:**
+
+- `_dedup_imports_from_extra` — strips import lines from the extra-pass code that already exist in the accumulated class.
+- `_dedup_imports_global` — re-emits unique import lines at the top after a structural merge.
+- `_check_duplicate_methods` — detects methods with the same name in both fragments, logs a WARNING, and keeps the first-pass version.
+
+**Configuration:**
+
+| Environment variable | Default | Description |
+|---|---|---|
+| `ENABLE_MULTI_PASS` | `true` | Set to `false` to restore single-pass behaviour |
+| `MAX_PASSES` | `10` | Maximum LLM calls per generated file (including the first pass) |
 
 ### Context window registry
 
@@ -557,7 +632,7 @@ Relationship target + cardinality     Import statements
 Business rule strings                 Comments
 ```
 
-A service class with 15 methods typically produces a `methods_info` block of **300–500 tokens** — well within the 2 000-token budget.
+A service class with 15 methods typically produces a `methods_info` block of **300–500 tokens** — well within the 2 000-token budget. Multi-pass recovery is a backstop for unusually large classes, not the common path.
 
 ---
 
@@ -666,6 +741,7 @@ java-to-node-agent/
 ---
 
 ## Architecture Decisions
+
 
 All significant design decisions are documented as Architecture Decision Records in [docs/adr/](docs/adr/).
 
